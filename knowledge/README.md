@@ -1,6 +1,8 @@
 # Base de connaissances
 
-Chaque fichier `.md` de ce dossier est lu par l'assistant avant de répondre.
+Au premier démarrage, chaque fichier `.md` de ce dossier devient un document de l'assistant.
+Ensuite, les documents se gèrent depuis l'espace administration (`/admin`) :
+modifier ces fichiers n'a plus d'effet une fois le site lancé.
 L'assistant ne répond **qu'avec** ce qui est écrit ici.
 
 - Un fichier par sujet (formations, admission, frais…).

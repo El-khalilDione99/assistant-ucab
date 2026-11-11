@@ -38,6 +38,11 @@ export default function Chat() {
     } catch {}
   }, [lang]);
 
+  // Compte la visite (pour le tableau de bord de l'administration)
+  useEffect(() => {
+    void fetch("/api/visit", { method: "POST" }).catch(() => {});
+  }, []);
+
   // Diaporama du panneau
   useEffect(() => {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;

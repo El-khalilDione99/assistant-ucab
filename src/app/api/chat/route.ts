@@ -1,6 +1,10 @@
+import { randomUUID } from "node:crypto";
+import { after } from "next/server";
 import { streamAnswer, MissingKeyError, type ChatMessage } from "@/lib/ai";
-import { loadKnowledge } from "@/lib/knowledge";
-import { buildSystemPrompt } from "@/lib/prompt";
+import { readCookie } from "@/lib/auth";
+import { contextFor } from "@/lib/knowledge";
+import { buildSystemPrompt, NO_ANSWER } from "@/lib/prompt";
+import { isMobile, logQuestion, VISITOR_COOKIE } from "@/lib/stats";
 import type { Lang } from "@/lib/i18n";
 
 const MAX_MESSAGES = 12; // historique envoyé à l'IA
@@ -49,7 +53,10 @@ export async function POST(request: Request) {
   }
 
   const uiLang: Lang = lang === "ar" ? "ar" : "fr";
-  const system = buildSystemPrompt(await loadKnowledge(), uiLang);
+  const question = clean[clean.length - 1].content;
+  // On cherche dans les documents avec la question et la précédente (pour « et pour le master ? »).
+  const userTurns = clean.filter((m) => m.role === "user").slice(-2).map((m) => m.content);
+  const system = buildSystemPrompt(await contextFor(userTurns.join("\n")), uiLang);
   const iterator = streamAnswer(system, clean);
 
   // On attend le premier morceau pour pouvoir renvoyer une vraie erreur si l'IA ne répond pas.
@@ -62,25 +69,72 @@ export async function POST(request: Request) {
     return Response.json({ error: "ai_unavailable" }, { status });
   }
 
+  let visitor = readCookie(request, VISITOR_COOKIE);
+  const newVisitor = !visitor || !/^[\w-]{8,64}$/.test(visitor);
+  if (newVisitor) visitor = randomUUID();
+  const mobile = isMobile(request.headers.get("user-agent"));
+  const answerLang: "fr" | "ar" = /[؀-ۿ]/.test(question) ? "ar" : "fr";
+
   const encoder = new TextEncoder();
+  let full = "";
+  let sent = 0;
+  let finished: (answered: boolean | null) => void = () => {};
+  const done = new Promise<boolean | null>((resolve) => (finished = resolve));
+
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
+      // Le code « sans réponse » ne doit jamais apparaître à l'écran :
+      // on garde toujours la fin du texte en réserve tant qu'elle pourrait en être le début.
+      const flush = () => {
+        let visible = full.replace(NO_ANSWER, "");
+        for (let k = NO_ANSWER.length - 1; k > 0; k--) {
+          if (visible.endsWith(NO_ANSWER.slice(0, k))) {
+            visible = visible.slice(0, -k);
+            break;
+          }
+        }
+        // Les espaces de fin attendent le morceau suivant (ils peuvent précéder le code).
+        visible = visible.trimEnd();
+        if (visible.length > sent) {
+          controller.enqueue(encoder.encode(visible.slice(sent)));
+          sent = visible.length;
+        }
+      };
+      let ok = true;
       try {
-        if (!first.done) controller.enqueue(encoder.encode(first.value));
+        if (!first.done) full += first.value;
+        flush();
         for (;;) {
           const { value, done } = await iterator.next();
           if (done) break;
-          controller.enqueue(encoder.encode(value));
+          full += value;
+          flush();
         }
       } catch (err) {
+        ok = false;
         console.error("[chat] stream", err);
       } finally {
+        flush();
         controller.close();
+        finished(ok && full.trim() ? !full.includes(NO_ANSWER) : null);
       }
     },
   });
 
-  return new Response(stream, {
-    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+  // Après la réponse : on note la question pour le tableau de bord.
+  after(async () => {
+    const answered = await done;
+    if (answered === null) return;
+    try {
+      logQuestion({ visitor: visitor!, lang: answerLang, mobile, answered, text: question });
+    } catch (err) {
+      console.error("[chat] stats", err);
+    }
   });
+
+  const headers = new Headers({ "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+  if (newVisitor) {
+    headers.append("Set-Cookie", `${VISITOR_COOKIE}=${visitor}; Path=/; Max-Age=31536000; SameSite=Lax; HttpOnly`);
+  }
+  return new Response(stream, { headers });
 }

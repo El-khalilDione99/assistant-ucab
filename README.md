@@ -29,7 +29,7 @@ npm run dev                  # ouvre http://localhost:3000
 | --- | --- |
 | `AI_PROVIDER` | `groq` (par défaut) ou `anthropic` |
 | `GROQ_API_KEY` | Clé Groq, créée sur https://console.groq.com/keys |
-| `GROQ_MODEL` | Modèle Groq (par défaut `llama-3.3-70b-versatile`) |
+| `GROQ_MODEL` | Modèle Groq (par défaut `openai/gpt-oss-120b`) |
 | `ANTHROPIC_API_KEY` | Clé Claude, seulement si `AI_PROVIDER=anthropic` |
 | `ANTHROPIC_MODEL` | Modèle Claude (par défaut `claude-haiku-5-5`) |
 

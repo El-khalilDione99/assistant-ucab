@@ -1,0 +1,110 @@
+export type Lang = "fr" | "ar";
+
+export const PHONE = "+221 77 645 80 11";
+
+export const UI = {
+  fr: {
+    uniName: "Université Cheikh Ahmadou Bamba",
+    centre: "Centre de Dakar",
+    tickerTag: "Infos UCAB",
+    hidePics: "Masquer les photos",
+    showPics: "Afficher les photos",
+    centresT: "Nos 4 centres",
+    centres: ["Dakar · Fass Mbao", "Touba", "Bambey", "Saint-Louis"],
+    placeholder: "Écrivez votre question…",
+    footNote: `Pour une information officielle, appelez l'UCAB au ${PHONE}.`,
+    today: "Aujourd'hui",
+    switched: "L'assistant répond maintenant en français",
+    reset: "Nouvelle conversation",
+    send: "Envoyer",
+    question: "Votre question",
+    quickLabel: "Questions rapides",
+    langLabel: "Langue",
+    error: "Désolé, je n'arrive pas à répondre pour le moment. Réessayez dans un instant, ou appelez l'UCAB au +221 77 645 80 11.",
+    tooMany: "Vous avez posé beaucoup de questions d'un coup. Patientez une minute, puis réessayez.",
+    ticker: [
+      "Toutes vos questions sur l'UCAB Dakar, à toute heure",
+      "Licences en génie civil, géomètre-topographe, électricité et informatique industrielle",
+      "Le baccalauréat arabe est reconnu par l'État depuis 2013",
+      `Pré-inscriptions : renseignez-vous au ${PHONE}`,
+      "Université agréée depuis 2016 après évaluation de l'ANAQ-Sup",
+      "Campus de Dakar à Fass Mbao, près de 2 000 étudiants",
+    ],
+    places: {
+      fst: "Faculté des Sciences et Technologies",
+      campus: "Le campus de Fass Mbao",
+      hall: "L'UCAB, fidèle à l'héritage de Cheikh Ahmadou Bamba",
+      lab: "Salle informatique",
+      portrait: "UCAB · Centre de Dakar",
+    },
+  },
+  ar: {
+    uniName: "جامعة الشيخ أحمد بامبا",
+    centre: "مركز داكار",
+    tickerTag: "أخبار الجامعة",
+    hidePics: "إخفاء الصور",
+    showPics: "إظهار الصور",
+    centresT: "مراكزنا الأربعة",
+    centres: ["داكار · فاس مباو", "طوبى", "بامبي", "سان لويس"],
+    placeholder: "اكتب سؤالك…",
+    footNote: "للحصول على معلومة رسمية، اتصل بالجامعة: 11 80 645 77 221+",
+    today: "اليوم",
+    switched: "يجيب المساعد الآن بالعربية",
+    reset: "محادثة جديدة",
+    send: "إرسال",
+    question: "سؤالك",
+    quickLabel: "أسئلة سريعة",
+    langLabel: "اللغة",
+    error: "عذراً، لا أستطيع الإجابة حالياً. حاول بعد لحظات، أو اتصل بالجامعة على الرقم 11 80 645 77 221+.",
+    tooMany: "لقد أرسلت أسئلة كثيرة دفعة واحدة. انتظر دقيقة ثم أعد المحاولة.",
+    ticker: [
+      "كل أسئلتك عن جامعة الشيخ أحمد بامبا بداكار، في أي وقت",
+      "ليسانس في الهندسة المدنية والمساحة والطبوغرافيا والكهرباء والمعلوماتية الصناعية",
+      "البكالوريا العربية معترف بها من الدولة منذ 2013",
+      "التسجيل المسبق: استفسر على الرقم 11 80 645 77 221+",
+      "جامعة معتمدة منذ 2016",
+      "حرم داكار في فاس مباو، قرابة 2000 طالب",
+    ],
+    places: {
+      fst: "كلية العلوم والتكنولوجيا",
+      campus: "حرم فاس مباو",
+      hall: "الجامعة وفيّة لإرث الشيخ أحمد بامبا",
+      lab: "قاعة الإعلام الآلي",
+      portrait: "الجامعة · مركز داكار",
+    },
+  },
+} as const;
+
+/** Questions rapides : le libellé du bouton est envoyé tel quel comme question. */
+export const QUICK: Record<Lang, string[]> = {
+  fr: [
+    "Formations à Dakar",
+    "Conditions d'admission",
+    "Comment s'inscrire ?",
+    "Frais de scolarité",
+    "Où est le campus ?",
+    "Contacter l'UCAB",
+    "Autres filières",
+    "Services aux étudiants",
+    "Découvrir l'UCAB",
+  ],
+  ar: [
+    "التخصصات في داكار",
+    "شروط القبول",
+    "كيف أسجّل؟",
+    "الرسوم الدراسية",
+    "أين يقع الحرم الجامعي؟",
+    "التواصل مع الجامعة",
+    "تخصصات أخرى",
+    "خدمات الطلاب",
+    "تعرّف على الجامعة",
+  ],
+};
+
+export const SLIDES = [
+  { name: "fst", src: "/images/fst.jpg", pos: "center 30%" },
+  { name: "campus", src: "/images/campus.jpg", pos: "center" },
+  { name: "hall", src: "/images/hall.jpg", pos: "40% center" },
+  { name: "lab", src: "/images/lab.jpg", pos: "center" },
+  { name: "portrait", src: "/images/portrait.jpg", pos: "center 20%" },
+] as const;

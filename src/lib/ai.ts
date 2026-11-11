@@ -26,11 +26,19 @@ export async function* streamAnswer(system: string, messages: ChatMessage[]): As
 async function* streamGroq(system: string, messages: ChatMessage[]): AsyncGenerator<string> {
   if (!process.env.GROQ_API_KEY) throw new MissingKeyError("GROQ_API_KEY");
   const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  // llama-3.3-70b-versatile a été retiré par Groq en août 2026 : on utilise gpt-oss-120b.
+  const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+  // Les modèles gpt-oss « réfléchissent » avant de répondre : on garde cette réflexion courte
+  // et hors de la réponse, et on lui laisse assez de place pour terminer la réponse.
+  const reasoning = model.startsWith("openai/gpt-oss")
+    ? { reasoning_effort: "low" as const, include_reasoning: false }
+    : {};
   const stream = await client.chat.completions.create({
-    model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-    max_tokens: MAX_TOKENS,
+    model,
+    max_completion_tokens: 2000,
     temperature: 0.2,
     stream: true,
+    ...reasoning,
     messages: [{ role: "system", content: system }, ...messages],
   });
   for await (const chunk of stream) {
